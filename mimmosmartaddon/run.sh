@@ -78,8 +78,9 @@ EOF
 
 if [ -n "${CUSTOM_DOMAIN}" ]; then
   echo "custom_domains = ${CUSTOM_DOMAIN}" >> "${CONFIG_PATH}"
-elif [ -n "${SUBDOMAIN}" ]; then
-  echo "subdomain = ${SUBDOMAIN}" >> "${CONFIG_PATH}"
+else
+  # Se CUSTOM_DOMAIN non c'è, usa sempre SUBDOMAIN (o NAMESPACE)
+  echo "subdomain = ${NAMESPACE}" >> "${CONFIG_PATH}"
 fi
 
 echo "[INFO] Configurazione creata per Namespace: ${NAMESPACE}"
