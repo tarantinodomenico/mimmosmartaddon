@@ -12,9 +12,9 @@ fi
 
 # --- Leggo configurazione via JQ ---
 FRP_SERVER_ADDR=$(jq -r '.frp_server_addr // empty' "$OPTIONS_FILE")
-FRP_SERVER_PORT=$(jq -r '.frp_server_port // 7000' "$OPTIONS_FILE")
+FRP_SERVER_PORT=$(jq -r '.frp_server_port // 7001' "$OPTIONS_FILE")
 FRP_SHARED_TOKEN=$(jq -r '.frp_shared_token // empty' "$OPTIONS_FILE")
-LOCAL_IP=$(jq -r '.local_ip // "127.0.0.1"' "$OPTIONS_FILE")
+LOCAL_IP=$(jq -r '.local_ip // empty' "$OPTIONS_FILE")
 LOCAL_PORT=$(jq -r '.local_port // 8123' "$OPTIONS_FILE")
 SUBDOMAIN=$(jq -r '.subdomain // empty' "$OPTIONS_FILE")
 CUSTOM_DOMAIN=$(jq -r '.custom_domain // empty' "$OPTIONS_FILE")
