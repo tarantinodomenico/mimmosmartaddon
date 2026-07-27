@@ -58,27 +58,26 @@ if [ ! -x /data/frpc ]; then
   rm -rf "${TMPDIR}"
 fi
 
-# --- Generazione Configurazione INI ---
-echo "[INFO] Configuro FRPC..."
-CONFIG_PATH="/data/frpc.ini"
+# --- Generazione Configurazione TOML ---
+echo "[INFO] Configuro FRPC (TOML)..."
+CONFIG_PATH="/data/frpc.toml"
 
 cat > "${CONFIG_PATH}" <<EOF
-[common]
-server_addr = ${FRP_SERVER_ADDR}
-server_port = ${FRP_SERVER_PORT}
-token = ${FRP_SHARED_TOKEN}
-login_fail_exit = false
-tls_enable = true
+serverAddr = "${FRP_SERVER_ADDR}"
+serverPort = ${FRP_SERVER_PORT}
+auth.token = "${FRP_SHARED_TOKEN}"
+transport.tls.enable = true
 
-[${NAMESPACE}]
-type = http
-local_ip = ${LOCAL_IP}
-local_port = ${LOCAL_PORT}
-subdomain = ${NAMESPACE}
+[[proxies]]
+name = "${NAMESPACE}"
+type = "http"
+localIP = "${LOCAL_IP}"
+localPort = ${LOCAL_PORT}
+subdomain = "${NAMESPACE}"
 EOF
 
 if [ -n "${CUSTOM_DOMAIN}" ]; then
-  echo "custom_domains = ${CUSTOM_DOMAIN}" >> "${CONFIG_PATH}"
+  echo "customDomains = [\"${CUSTOM_DOMAIN}\"]" >> "${CONFIG_PATH}"
 fi
 
 echo "[INFO] Configurazione creata per Namespace: ${NAMESPACE}"
