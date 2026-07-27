@@ -77,8 +77,8 @@ elif [[ -n "${SUBDOMAIN}" ]]; then
 fi
 
 bashio::log.info "Configurazione FRPC generata:"
-sed 's/token = .*/token = "****"/g' "${CONFIG_PATH}" | sed 's/^/  /'
+sed 's/token = .*/token = "****"/g' "${CONFIG_PATH}"
 bashio::log.info "Namespace (user) impostato a: ${NAMESPACE}"
 
 # --- Avvio frpc ---
-/data/frpc -c "${CONFIG_PATH}"
+/data/frpc -c "${CONFIG_PATH}""
