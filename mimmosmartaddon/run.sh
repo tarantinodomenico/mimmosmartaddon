@@ -1,48 +1,55 @@
-#!/usr/bin/env bashio
+#!/usr/bin/env bash
 set -euo pipefail
 
-bashio::log.info "Avvio MimmoSmart FRPC add-on..."
+echo "[INFO] Avvio MimmoSmart FRPC add-on..."
 
-# --- Leggo configurazione dall’UI dell’add-on ---
-FRP_SERVER_ADDR=$(bashio::config 'frp_server_addr')
-FRP_SERVER_PORT=$(bashio::config 'frp_server_port' '7000')
-FRP_SHARED_TOKEN=$(bashio::config 'frp_shared_token')
-LOCAL_IP=$(bashio::config 'local_ip' '127.0.0.1')
-LOCAL_PORT=$(bashio::config 'local_port' '8123')
-SUBDOMAIN=$(bashio::config 'subdomain' '')
-CUSTOM_DOMAIN=$(bashio::config 'custom_domain' '')
+OPTIONS_FILE="/data/options.json"
 
-# --- Validazioni minime ---
-if [[ -z "${FRP_SERVER_ADDR}" || -z "${FRP_SHARED_TOKEN}" ]]; then
-  bashio::log.fatal "frp_server_addr e frp_shared_token sono obbligatori!"
+if [ ! -f "$OPTIONS_FILE" ]; then
+    echo "[FATAL] File di configurazione /data/options.json non trovato!"
+    exit 1
+fi
+
+# --- Leggo configurazione via JQ ---
+FRP_SERVER_ADDR=$(jq -r '.frp_server_addr // empty' "$OPTIONS_FILE")
+FRP_SERVER_PORT=$(jq -r '.frp_server_port // 7000' "$OPTIONS_FILE")
+FRP_SHARED_TOKEN=$(jq -r '.frp_shared_token // empty' "$OPTIONS_FILE")
+LOCAL_IP=$(jq -r '.local_ip // "127.0.0.1"' "$OPTIONS_FILE")
+LOCAL_PORT=$(jq -r '.local_port // 8123' "$OPTIONS_FILE")
+SUBDOMAIN=$(jq -r '.subdomain // empty' "$OPTIONS_FILE")
+CUSTOM_DOMAIN=$(jq -r '.custom_domain // empty' "$OPTIONS_FILE")
+
+# --- Validazione ---
+if [ -z "${FRP_SERVER_ADDR}" ] || [ -z "${FRP_SHARED_TOKEN}" ]; then
+  echo "[FATAL] frp_server_addr e frp_shared_token sono obbligatori!"
   exit 1
 fi
 
-# --- Calcolo NAMESPACE per FRP (user=...) ---
-NAMESPACE="${SUBDOMAIN:-}"
-if [[ -z "$NAMESPACE" && -n "${CUSTOM_DOMAIN:-}" ]]; then
+# --- Calcolo NAMESPACE ---
+NAMESPACE="${SUBDOMAIN}"
+if [ -z "$NAMESPACE" ] && [ -n "${CUSTOM_DOMAIN}" ]; then
   NAMESPACE="${CUSTOM_DOMAIN%%.*}"
 fi
-if [[ -z "$NAMESPACE" ]]; then
+if [ -z "$NAMESPACE" ]; then
   NAMESPACE="$(hostname)"
 fi
 
-# --- Scarico frpc se non presente ---
-ARCH="$(bashio::info.arch)"
+# --- Identificazione Architettura ---
+ARCH=$(uname -m)
 case "$ARCH" in
-  aarch64)     FRP_ARCH="linux_arm64" ;;
-  armv7|armhf) FRP_ARCH="linux_arm" ;;
-  i386)        FRP_ARCH="linux_386" ;;
-  amd64)       FRP_ARCH="linux_amd64" ;;
-  *)           bashio::log.fatal "Architettura non supportata: $ARCH"; exit 1 ;;
+  x86_64)   FRP_ARCH="linux_amd64" ;;
+  aarch64)  FRP_ARCH="linux_arm64" ;;
+  armv7l)   FRP_ARCH="linux_arm" ;;
+  i386)     FRP_ARCH="linux_386" ;;
+  *)        echo "[FATAL] Architettura non supportata: $ARCH"; exit 1 ;;
 esac
 
 FRP_VERSION="0.64.0"
 FRP_TGZ="frp_${FRP_VERSION}_${FRP_ARCH}.tar.gz"
 FRP_URL="https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/${FRP_TGZ}"
 
-if [[ ! -x /data/frpc ]]; then
-  bashio::log.info "Scarico frpc ${FRP_VERSION} (${FRP_ARCH})..."
+if [ ! -x /data/frpc ]; then
+  echo "[INFO] Scarico frpc ${FRP_VERSION} (${FRP_ARCH})..."
   TMPDIR=$(mktemp -d)
   curl -fsSL -o "${TMPDIR}/${FRP_TGZ}" "${FRP_URL}"
   tar -xzf "${TMPDIR}/${FRP_TGZ}" -C "${TMPDIR}"
@@ -51,8 +58,8 @@ if [[ ! -x /data/frpc ]]; then
   rm -rf "${TMPDIR}"
 fi
 
-# --- Genero configurazione INI per frpc ---
-bashio::log.info "Configuro FRPC..."
+# --- Generazione Configurazione INI ---
+echo "[INFO] Configuro FRPC..."
 CONFIG_PATH="/data/frpc.ini"
 
 cat > "${CONFIG_PATH}" <<EOF
@@ -70,15 +77,14 @@ local_ip = ${LOCAL_IP}
 local_port = ${LOCAL_PORT}
 EOF
 
-if [[ -n "${CUSTOM_DOMAIN}" ]]; then
+if [ -n "${CUSTOM_DOMAIN}" ]; then
   echo "custom_domains = ${CUSTOM_DOMAIN}" >> "${CONFIG_PATH}"
-elif [[ -n "${SUBDOMAIN}" ]]; then
+elif [ -n "${SUBDOMAIN}" ]; then
   echo "subdomain = ${SUBDOMAIN}" >> "${CONFIG_PATH}"
 fi
 
-bashio::log.info "Configurazione FRPC generata:"
-sed 's/token = .*/token = "****"/g' "${CONFIG_PATH}"
-bashio::log.info "Namespace (user) impostato a: ${NAMESPACE}"
+echo "[INFO] Configurazione creata per Namespace: ${NAMESPACE}"
 
-# --- Avvio frpc ---
-/data/frpc -c "${CONFIG_PATH}""
+# --- Avvio FRPC ---
+echo "[INFO] Avvio frpc in corso..."
+exec /data/frpc -c "${CONFIG_PATH}"
