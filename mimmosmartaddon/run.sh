@@ -27,9 +27,32 @@ if [[ -z "$NAMESPACE" ]]; then
   NAMESPACE="$(hostname)"
 fi
 
-# --- Genero configurazione TOML per frpc ---
-bashio::log.info "Generazione configurazione frpc.toml..."
+# --- Scarico frpc se non presente ---
+ARCH="$(bashio::info.arch)"
+case "$ARCH" in
+  aarch64)     FRP_ARCH="linux_arm64" ;;
+  armv7|armhf) FRP_ARCH="linux_arm" ;;
+  i386)        FRP_ARCH="linux_386" ;;
+  amd64)       FRP_ARCH="linux_amd64" ;;
+  *)           bashio::log.fatal "Architettura non supportata: $ARCH"; exit 1 ;;
+esac
 
+FRP_VERSION="0.64.0"
+FRP_TGZ="frp_${FRP_VERSION}_${FRP_ARCH}.tar.gz"
+FRP_URL="https://github.com/fatedier/frp/releases/download/v${FRP_VERSION}/${FRP_TGZ}"
+
+if [[ ! -x /data/frpc ]]; then
+  bashio::log.info "Scarico frpc ${FRP_VERSION} (${FRP_ARCH})..."
+  TMPDIR=$(mktemp -d)
+  curl -fsSL -o "${TMPDIR}/${FRP_TGZ}" "${FRP_URL}"
+  tar -xzf "${TMPDIR}/${FRP_TGZ}" -C "${TMPDIR}"
+  cp "${TMPDIR}/frp_${FRP_VERSION}_${FRP_ARCH}/frpc" /data/frpc
+  chmod +x /data/frpc
+  rm -rf "${TMPDIR}"
+fi
+
+# --- Genero configurazione TOML per frpc (FRP >= 0.52) ---
+bashio::log.info "Configuro FRPC..."
 CONFIG_PATH="/data/frpc.toml"
 
 cat > "${CONFIG_PATH}" <<EOF
@@ -58,10 +81,10 @@ sed 's/auth.token = .*/auth.token = "****"/g' "${CONFIG_PATH}" | sed 's/^/  /'
 bashio::log.info "Namespace (user) impostato a: ${NAMESPACE}"
 
 # --- Avvio frpc con watchdog ---
-bashio::log.info "Avvio del servizio FRPC..."
+bashio::log.info "Avvio frpc con watchdog..."
 SLEEP=5
 while true; do
-  /usr/bin/frpc -c "${CONFIG_PATH}"
+  /data/frpc -c "${CONFIG_PATH}"
   EC=$?
   bashio::log.warning "frpc terminato con codice ${EC}; nuovo tentativo tra ${SLEEP}s"
   sleep "${SLEEP}"
