@@ -1,9 +1,15 @@
 ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
 FROM ${BUILD_FROM}
 
+# Installazione dipendenze
 RUN apk add --no-cache curl tar ca-certificates bash jq
 
-COPY run.sh /
-RUN chmod a+x /run.sh
+# Definizione del servizio s6-overlay v3
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/frpc \
+    && mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d \
+    && echo "longrun" > /etc/s6-overlay/s6-rc.d/frpc/type \
+    && touch /etc/s6-overlay/s6-rc.d/user/contents.d/frpc
 
-CMD [ "/run.sh" ]
+# Copia dello script di avvio come servizio s6
+COPY run.sh /etc/s6-overlay/s6-rc.d/frpc/run
+RUN chmod +x /etc/s6-overlay/s6-rc.d/frpc/run
