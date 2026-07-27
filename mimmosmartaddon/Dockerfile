@@ -4,8 +4,12 @@ FROM ${BUILD_FROM}
 # Installazione dipendenze
 RUN apk add --no-cache curl tar ca-certificates bash jq
 
-# Copia dello script di avvio direttamente nella radice
-COPY run.sh /run.sh
-RUN chmod +x /run.sh
+# Creazione della struttura nativa del servizio per s6-overlay v3
+RUN mkdir -p /etc/s6-overlay/s6-rc.d/frpc \
+    && mkdir -p /etc/s6-overlay/s6-rc.d/user/contents.d \
+    && echo "longrun" > /etc/s6-overlay/s6-rc.d/frpc/type \
+    && touch /etc/s6-overlay/s6-rc.d/user/contents.d/frpc
 
-CMD [ "/run.sh" ]
+# Copia e assegnazione permessi dello script
+COPY run.sh /etc/s6-overlay/s6-rc.d/frpc/run
+RUN chmod +x /etc/s6-overlay/s6-rc.d/frpc/run
