@@ -1,6 +1,6 @@
 name: "MimmoSmart FRP Client"
 slug: "mimmosmartaddon"
-version: "1.0.1"
+version: "1.0.2"
 description: "Client FRP per l'accesso remoto sicuro alle istanze Home Assistant"
 url: "https://github.com/tarantinodomenico/mimmosmartaddon"
 arch:
@@ -11,6 +11,8 @@ arch:
 startup: services
 boot: auto
 init: false
+hassio_api: true
+hassio_role: default
 options:
   frp_server_addr: "api.stavebnitarantino.cz"
   frp_server_port: 7000
