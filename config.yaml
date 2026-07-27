@@ -1,14 +1,28 @@
-name: "MimmoSmart Addon"
+name: "MimmoSmart FRP Client"
 slug: "mimmosmartaddon"
 version: "1.0.0"
-description: "Add-on personalizzato curato da MimmoSmart"
+description: "Client FRP per l'accesso remoto sicuro alle istanze Home Assistant"
 url: "https://github.com/tarantinodomenico/mimmosmartaddon"
 arch:
   - aarch64
   - amd64
   - armhf
   - armv7
-startup: application
+startup: services
 boot: auto
-options: {}
-schema: {}
+options:
+  frp_server_addr: ""
+  frp_server_port: 7000
+  frp_shared_token: ""
+  local_ip: "127.0.0.1"
+  local_port: 8123
+  subdomain: ""
+  custom_domain: ""
+schema:
+  frp_server_addr: str
+  frp_server_port: port
+  frp_shared_token: password
+  local_ip: str
+  local_port: port
+  subdomain: str?
+  custom_domain: str?
