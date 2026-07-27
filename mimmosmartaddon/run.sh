@@ -74,13 +74,11 @@ tls_enable = true
 type = http
 local_ip = ${LOCAL_IP}
 local_port = ${LOCAL_PORT}
+subdomain = ${NAMESPACE}
 EOF
 
 if [ -n "${CUSTOM_DOMAIN}" ]; then
   echo "custom_domains = ${CUSTOM_DOMAIN}" >> "${CONFIG_PATH}"
-else
-  # Se CUSTOM_DOMAIN non c'è, usa sempre SUBDOMAIN (o NAMESPACE)
-  echo "subdomain = ${NAMESPACE}" >> "${CONFIG_PATH}"
 fi
 
 echo "[INFO] Configurazione creata per Namespace: ${NAMESPACE}"
