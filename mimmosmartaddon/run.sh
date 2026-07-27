@@ -80,15 +80,5 @@ bashio::log.info "Configurazione FRPC generata:"
 sed 's/auth.token = .*/auth.token = "****"/g' "${CONFIG_PATH}" | sed 's/^/  /'
 bashio::log.info "Namespace (user) impostato a: ${NAMESPACE}"
 
-# --- Avvio frpc con watchdog ---
-bashio::log.info "Avvio frpc con watchdog..."
-SLEEP=5
-while true; do
-  /data/frpc -c "${CONFIG_PATH}"
-  EC=$?
-  bashio::log.warning "frpc terminato con codice ${EC}; nuovo tentativo tra ${SLEEP}s"
-  sleep "${SLEEP}"
-  if [ "${SLEEP}" -lt 60 ]; then
-    SLEEP=$((SLEEP + 5))
-  fi
-done
+# --- Avvio frpc ---
+/data/frpc -c "${CONFIG_PATH}"
