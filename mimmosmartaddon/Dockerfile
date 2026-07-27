@@ -1,13 +1,13 @@
 ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
 FROM ${BUILD_FROM}
 
-# Dipendenze necessarie per bashio e download
-RUN apk add --no-cache \
-    curl \
-    jq \
-    tar \
-    ca-certificates
+# Dipendenze
+RUN apk add --no-cache curl tar ca-certificates bash jq
 
-# Copia e configura lo script di avvio nella cartella di s6
-COPY run.sh /etc/services.d/frpc/run
-RUN chmod a+x /etc/services.d/frpc/run
+# Copia dello script
+COPY run.sh /
+RUN chmod a+x /run.sh
+
+# Configurazione Entrypoint corretta per s6-overlay v3
+ENTRYPOINT ["/init"]
+CMD ["/run.sh"]
