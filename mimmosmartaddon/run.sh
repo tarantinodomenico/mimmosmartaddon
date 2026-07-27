@@ -69,9 +69,8 @@ server_port = ${FRP_SERVER_PORT}
 token = ${FRP_SHARED_TOKEN}
 login_fail_exit = false
 tls_enable = true
-user = ${NAMESPACE}
 
-[homeassistant]
+[${NAMESPACE}]
 type = http
 local_ip = ${LOCAL_IP}
 local_port = ${LOCAL_PORT}
