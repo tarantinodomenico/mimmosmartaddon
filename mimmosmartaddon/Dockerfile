@@ -3,7 +3,7 @@ FROM ${BUILD_FROM}
 
 RUN apk add --no-cache curl tar ca-certificates bash jq
 
-COPY run.sh /run.sh
-RUN chmod +x /run.sh
+COPY run.sh /
+RUN chmod a+x /run.sh
 
 CMD [ "/run.sh" ]
