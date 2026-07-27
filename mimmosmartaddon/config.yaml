@@ -1,6 +1,6 @@
 name: "MimmoSmart FRP Client"
 slug: "mimmosmartaddon"
-version: "1.1.0"
+version: "1.1.1"
 description: "Client FRP per l'accesso remoto sicuro"
 url: "https://github.com/tarantinodomenico/mimmosmartaddon"
 arch:
@@ -13,7 +13,7 @@ boot: auto
 init: false
 options:
   frp_server_addr: "api.stavebnitarantino.cz"
-  frp_server_port: 7000
+  frp_server_port: 7001
   frp_shared_token: ""
   local_ip: ""
   local_port: 8123
