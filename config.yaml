@@ -1,0 +1,14 @@
+name: "MimmoSmart Addon"
+slug: "mimmosmartaddon"
+version: "1.0.0"
+description: "Add-on personalizzato curato da MimmoSmart"
+url: "https://github.com/tarantinodomenico/mimmosmartaddon"
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+startup: application
+boot: auto
+options: {}
+schema: {}
