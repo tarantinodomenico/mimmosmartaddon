@@ -51,7 +51,7 @@ if [[ ! -x /data/frpc ]]; then
   rm -rf "${TMPDIR}"
 fi
 
-# --- Genero configurazione TOML per frpc (FRP >= 0.52) ---
+# --- Genero configurazione TOML per frpc ---
 bashio::log.info "Configuro FRPC..."
 CONFIG_PATH="/data/frpc.toml"
 
