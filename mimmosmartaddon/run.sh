@@ -1,4 +1,4 @@
-#!/usr/bin/with-contenv bashio
+#!/usr/bin/env bashio
 set -euo pipefail
 
 bashio::log.info "Avvio MimmoSmart FRPC add-on..."
