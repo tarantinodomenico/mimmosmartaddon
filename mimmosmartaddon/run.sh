@@ -51,33 +51,33 @@ if [[ ! -x /data/frpc ]]; then
   rm -rf "${TMPDIR}"
 fi
 
-# --- Genero configurazione TOML per frpc ---
+# --- Genero configurazione INI per frpc ---
 bashio::log.info "Configuro FRPC..."
-CONFIG_PATH="/data/frpc.toml"
+CONFIG_PATH="/data/frpc.ini"
 
 cat > "${CONFIG_PATH}" <<EOF
-serverAddr = "${FRP_SERVER_ADDR}"
-serverPort = ${FRP_SERVER_PORT}
-auth.method = "token"
-auth.token = "${FRP_SHARED_TOKEN}"
-transport.tls.enable = true
-user = "${NAMESPACE}"
+[common]
+server_addr = ${FRP_SERVER_ADDR}
+server_port = ${FRP_SERVER_PORT}
+token = ${FRP_SHARED_TOKEN}
+login_fail_exit = false
+tls_enable = true
+user = ${NAMESPACE}
 
-[[proxies]]
-name = "homeassistant"
-type = "http"
-localIP = "${LOCAL_IP}"
-localPort = ${LOCAL_PORT}
+[homeassistant]
+type = http
+local_ip = ${LOCAL_IP}
+local_port = ${LOCAL_PORT}
 EOF
 
 if [[ -n "${CUSTOM_DOMAIN}" ]]; then
-  echo "customDomains = [\"${CUSTOM_DOMAIN}\"]" >> "${CONFIG_PATH}"
+  echo "custom_domains = ${CUSTOM_DOMAIN}" >> "${CONFIG_PATH}"
 elif [[ -n "${SUBDOMAIN}" ]]; then
-  echo "subdomain = \"${SUBDOMAIN}\"" >> "${CONFIG_PATH}"
+  echo "subdomain = ${SUBDOMAIN}" >> "${CONFIG_PATH}"
 fi
 
 bashio::log.info "Configurazione FRPC generata:"
-sed 's/auth.token = .*/auth.token = "****"/g' "${CONFIG_PATH}" | sed 's/^/  /'
+sed 's/token = .*/token = "****"/g' "${CONFIG_PATH}" | sed 's/^/  /'
 bashio::log.info "Namespace (user) impostato a: ${NAMESPACE}"
 
 # --- Avvio frpc ---
